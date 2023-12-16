@@ -16,11 +16,15 @@ if __name__ == "__main__":
 
     parser.add_argument("--pdf", type=str,
                         required=False, help="pdf filename for plotting the graph")
+
+    parser.add_argument("--resolution", type=float, default=None,
+                        help="if set, will run la.CPMVertexPartition with resolution parameter, otherwise uses la.ModularityVertexPartition")
     
     args = parser.parse_args()
     
     file_path = args.pairs
     plot_pdf = args.pdf
+    resolution = args.resolution
     
     # Read data from file
     with open(file_path, 'r') as file:
@@ -33,8 +37,12 @@ if __name__ == "__main__":
     graph = ig.Graph.TupleList(edges, directed=False)
     
     # Perform Leiden clustering
-    partition = la.find_partition(graph, la.ModularityVertexPartition)
-        
+    if resolution is not None:
+        partition = la.find_partition(graph, la.CPMVertexPartition,
+                                    resolution_parameter = resolution)
+    else:
+        partition = la.find_partition(graph, la.ModularityVertexPartition)
+    
     for part in partition:
         print(" ".join([str(graph.vs[x]['name']) for x in part]))
     
